@@ -7,6 +7,8 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
 
   private let field = NSTextField()
   private let chips = NSStackView()
+  private let warning = NSTextField(wrappingLabelWithString: "")
+  private var problems: [String: String] = [:]
   private var choices: [String] = []
   private var selected = 0
 
@@ -40,7 +42,11 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     field.placeholderString = "Capture…"
     field.delegate = self
 
-    let stack = NSStackView(views: [chips, field])
+    warning.font = .systemFont(ofSize: 12)
+    warning.textColor = .systemOrange
+    warning.preferredMaxLayoutWidth = 484
+
+    let stack = NSStackView(views: [chips, field, warning])
     stack.orientation = .vertical
     stack.alignment = .leading
     stack.spacing = 12
@@ -63,8 +69,9 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     orderOut(nil)
   }
 
-  func show(choices: [String], last: String?) {
+  func show(choices: [String], problems: [String: String], last: String?) {
     self.choices = choices
+    self.problems = problems
     selected = last.flatMap { choices.firstIndex(of: $0) } ?? 0
     field.stringValue = ""
     refreshChips()
@@ -96,6 +103,15 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
       }
       chips.addArrangedSubview(chip)
     }
+    let message = problems[choices[selected]]
+    warning.stringValue = message.map { "⚠ \($0)" } ?? ""
+    warning.isHidden = message == nil
+    // Grow downward: keep the top edge where it is.
+    let height = (contentView?.subviews.first as? NSStackView)?.fittingSize.height ?? frame.height
+    var next = frame
+    next.origin.y += next.height - height
+    next.size.height = height
+    setFrame(next, display: true)
   }
 
   private func cycle(_ step: Int) {

@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
   private var hotKey: HotKey?
   private var config = Config.default
   private var vault: Vault?
+  private var warningItems: [NSMenuItem] = []
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     panel.onSubmit = { [weak self] choice, text in self?.submit(choice: choice, text: text) }
@@ -42,6 +43,38 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
   func menuWillOpen(_ menu: NSMenu) {
     loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
+    for item in warningItems { menu.removeItem(item) }
+    warningItems = []
+    let found = currentProblems()
+    guard !found.isEmpty else { return }
+    let header = NSMenuItem(
+      title: "⚠ These choices ask for input in Obsidian:", action: nil, keyEquivalent: "")
+    let rows = found.map { problem -> NSMenuItem in
+      let row = NSMenuItem(
+        title: "    \(problem.name)", action: #selector(showProblem(_:)), keyEquivalent: "")
+      row.target = self
+      row.representedObject = problem
+      return row
+    }
+    warningItems = [header] + rows
+    for (offset, item) in warningItems.enumerated() { menu.insertItem(item, at: 1 + offset) }
+  }
+
+  @objc private func showProblem(_ sender: NSMenuItem) {
+    guard let problem = sender.representedObject as? Choices.Problem else { return }
+    alert(problem.name, problem.message)
+  }
+
+  /// Problems for the choices the panel would show. Errors stay silent here: opening the
+  /// panel reports them.
+  private func currentProblems() -> [Choices.Problem] {
+    guard let vault = try? Vault.resolve(name: config.vault),
+      let data = try? Data(contentsOf: vault.choicesURL),
+      let names = try? Choices.names(in: data),
+      let found = try? Choices.problems(in: data, variable: config.variable)
+    else { return [] }
+    let shown = Choices.select(from: names, wanted: config.choices)
+    return found.filter { shown.contains($0.name) }
   }
 
   @objc private func reloadConfig() {
@@ -75,7 +108,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
         throw QuickAddError.noMatchingChoices(vault: vault.name, available: names)
       }
       self.vault = vault
-      panel.show(choices: shown, last: UserDefaults.standard.string(forKey: "lastChoice"))
+      let problems = Dictionary(
+        currentProblems().map { ($0.name, $0.message) }, uniquingKeysWith: { first, _ in first })
+      panel.show(
+        choices: shown, problems: problems, last: UserDefaults.standard.string(forKey: "lastChoice")
+      )
     } catch {
       alert(error)
     }

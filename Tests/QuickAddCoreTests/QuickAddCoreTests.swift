@@ -50,6 +50,62 @@ import Testing
   }
 }
 
+@Suite struct ProblemsTests {
+  private func problems(_ json: String, variable: String = "text") throws -> [String: String] {
+    Dictionary(
+      uniqueKeysWithValues: try Choices.problems(in: Data(json.utf8), variable: variable)
+        .map { ($0.name, $0.message) })
+  }
+
+  @Test func flagsBareValue() throws {
+    let found = try problems(
+      #"{"choices":[{"name":"A","type":"Capture","format":{"format":"- {{VALUE}}"}}]}"#)
+    #expect(found["A"]?.contains("{{VALUE}}") == true)
+    #expect(found["A"]?.contains("{{VALUE:text}}") == true)
+  }
+
+  @Test func flagsOtherNamesAndBareNameAndMacroValue() throws {
+    let found = try problems(
+      #"""
+      {"choices":[
+        {"name":"A","type":"Capture","format":"{{VALUE:title}}"},
+        {"name":"B","type":"Template","fileName":"{{NAME}}"},
+        {"name":"C","type":"Capture","format":"{{MVALUE}}"}
+      ]}
+      """#)
+    #expect(Set(found.keys) == ["A", "B", "C"])
+  }
+
+  @Test func acceptsTheConfiguredVariable() throws {
+    let found = try problems(
+      #"""
+      {"choices":[
+        {"name":"A","type":"Capture","format":"{{VALUE:text}}"},
+        {"name":"B","type":"Capture","format":"{{value: text | trim}}"},
+        {"name":"C","type":"Capture","format":"{{DATE:YYYY}} {{VALUE:text|case:lower}}"}
+      ]}
+      """#)
+    #expect(found.isEmpty)
+  }
+
+  @Test func usesTheConfiguredVariableInTheAdvice() throws {
+    let found = try problems(
+      #"{"choices":[{"name":"A","type":"Capture","format":"{{VALUE}}"}]}"#, variable: "note")
+    #expect(found["A"]?.contains("{{VALUE:note}}") == true)
+  }
+
+  @Test func looksInsideMultiChoicesAndKeepsFolderOut() throws {
+    let found = try problems(
+      #"""
+      {"choices":[{"name":"Folder","type":"Multi","choices":[
+        {"name":"Inner","type":"Capture","format":"{{VALUE}}"},
+        {"name":"Fine","type":"Capture","format":"{{VALUE:text}}"}
+      ]}]}
+      """#)
+    #expect(Set(found.keys) == ["Inner"])
+  }
+}
+
 @Suite struct VaultTests {
   private let registry = Data(
     #"""

@@ -35,7 +35,7 @@ make install
 <!-- SECTION: GETTING_STARTED -->
 ## ☄ Getting started
 
-The app passes your text to QuickAdd as the variable `text`. Each choice must read it with `{{VALUE:text}}` and must not ask for anything else. A choice that opens its own prompt would show that prompt inside Obsidian.
+The app passes your text to QuickAdd as the variable `text`. Each choice must read it with `{{VALUE:text}}` and must not ask for anything else. A choice that opens its own prompt would show that prompt inside Obsidian. The app warns you about such a choice: in the menu, and under the choice names when the prompt opens. It flags a bare `{{VALUE}}`, `{{NAME}}` or `{{MVALUE}}`, and any `{{VALUE:<other name>}}`. It does not read template files that a choice links to.
 
 Example: a Capture choice named `TODO` that appends to `00 Inbox/TODO.md`, with this capture format:
 

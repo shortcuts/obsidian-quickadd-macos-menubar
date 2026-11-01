@@ -1,0 +1,73 @@
+name: Bug Report
+description: File a bug report.
+title: '[bug]: '
+labels: ['bug', 'triage']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Please help us help you!
+
+        Before filing your issue, ask yourself:
+        - Is there an issue already opened for this bug?
+        - Can I reproduce it?
+
+        In doubt, you can also open [a discussion](https://github.com/shortcuts/quickadd-macos-menubar/discussions/new/choose).
+  - type: textarea
+    attributes:
+      label: Description
+      description: A clear and concise description of what the bug is.
+    validations:
+      required: true
+  - type: input
+    id: macos-version
+    attributes:
+      label: macOS version
+      description: Apple menu > About This Mac.
+      placeholder: '26.1 (Apple Silicon)'
+    validations:
+      required: true
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      description: The `CFBundleShortVersionString` of the app, or the commit you built from.
+    validations:
+      required: true
+  - type: input
+    id: obsidian-version
+    attributes:
+      label: Obsidian and QuickAdd versions
+      placeholder: 'Obsidian 1.9.x, QuickAdd 2.x'
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Steps to reproduce
+      description: Write down the steps to reproduce the bug. Include the QuickAdd choice you run and its capture format.
+      placeholder: |
+        1. I press the hotkey `...`
+        2. I pick the choice `...`
+        3. I type `...` and press Enter
+        4. See error
+    validations:
+      required: true
+  - type: textarea
+    id: config
+    attributes:
+      label: Config file
+      description: The content of `~/.config/quickadd-menubar/config.toml`, if you changed it.
+      render: toml
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Open Console.app, filter on the process `QuickAddMenubar`, and paste what you see.
+      render: shell
+  - type: checkboxes
+    attributes:
+      label: Self-service
+      description: |
+        If you feel like you could contribute to this issue, please check the box below. This would tell us and other people looking for contributions that someone's working on it.
+      options:
+        - label: I'd be willing to fix this bug myself.

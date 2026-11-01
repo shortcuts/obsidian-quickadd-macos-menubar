@@ -1,0 +1,51 @@
+name: main
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: macos-latest
+    name: lint
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: make lint
+
+  tests:
+    needs:
+      - lint
+    runs-on: macos-latest
+    timeout-minutes: 10
+    name: tests
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: swift --version
+
+      - run: make test
+
+      - run: make app
+
+  release:
+    name: release
+    if: ${{ github.ref == 'refs/heads/main' }}
+    needs:
+      - tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: googleapis/release-please-action@v4
+        with:
+          release-type: simple
+          package-name: quickadd-macos-menubar

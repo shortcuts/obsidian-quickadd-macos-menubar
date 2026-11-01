@@ -17,6 +17,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     panel.onSubmit = { [weak self] choice, text in self?.submit(choice: choice, text: text) }
     settings.onSave = { [weak self] in self?.reloadConfig() }
     settings.onError = { [weak self] in self?.alert($0) }
+    settings.onRecording = { [weak self] recording in
+      if recording { self?.hotKey = nil } else { self?.reloadConfig() }
+    }
     setUpStatusItem()
     reloadConfig()
   }

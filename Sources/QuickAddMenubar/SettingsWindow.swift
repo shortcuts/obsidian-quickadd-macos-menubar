@@ -4,9 +4,12 @@ import QuickAddCore
 
 /// Edits `config.toml` through native controls. The hotkey modifiers stay hidden: the user
 /// presses the whole shortcut and the recorder keeps both parts.
-final class SettingsWindow: NSWindowController {
+final class SettingsWindow: NSWindowController, NSWindowDelegate {
   var onSave: (() -> Void)?
   var onError: ((Error) -> Void)?
+  /// Carbon swallows the saved shortcut before the recorder sees it, so the owner must
+  /// unregister the hotkey while recording.
+  var onRecording: ((Bool) -> Void)?
 
   private let vaultPopUp = NSPopUpButton()
   private let variableField = NSTextField()
@@ -27,6 +30,7 @@ final class SettingsWindow: NSWindowController {
     window.title = "QuickAdd Settings"
     window.isReleasedWhenClosed = false
     super.init(window: window)
+    window.delegate = self
 
     vaultPopUp.target = self
     vaultPopUp.action = #selector(vaultChanged)
@@ -136,11 +140,14 @@ final class SettingsWindow: NSWindowController {
     onSave?()
   }
 
+  func windowWillClose(_ notification: Notification) { stopRecording() }
+
   // MARK: Hotkey recorder
 
   @objc private func startRecording() {
     stopRecording()
     hotKeyButton.title = "Press shortcut…"
+    onRecording?(true)
     recorder = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
       guard let self else { return event }
       let mask = Self.carbonModifiers(event.modifierFlags)
@@ -161,8 +168,11 @@ final class SettingsWindow: NSWindowController {
   }
 
   private func stopRecording() {
-    if let recorder { NSEvent.removeMonitor(recorder) }
-    recorder = nil
+    if let recorder {
+      NSEvent.removeMonitor(recorder)
+      self.recorder = nil
+      onRecording?(false)
+    }
     updateHotKeyTitle()
   }
 

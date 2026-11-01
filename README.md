@@ -130,10 +130,6 @@ make test
 make build
 ```
 
-## 🎭 Motivations
-
-Launchers such as Raycast and Alfred can open QuickAdd URIs, but they are a second app to install and configure. Obsidian's own capture needs Obsidian in front of you. This app does one thing: a prompt, a hotkey, and your own QuickAdd choices.
-
 ## 💖 Sponsoring
 
 See [SPONSORING.md](./SPONSORING.md).

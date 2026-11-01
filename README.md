@@ -22,7 +22,13 @@ Press a global hotkey. A small prompt floats over whatever you are doing. Pick a
 <!-- SECTION: INSTALLATION -->
 ## 📋 Installation
 
-You need the Swift toolchain, which comes with the Xcode Command Line Tools (`xcode-select --install`).
+```sh
+curl -fsSL https://raw.githubusercontent.com/shortcuts/quickadd-macos-menubar/main/install.sh | sh
+```
+
+The script downloads the latest release into `~/Applications` and starts it. If no release exists, it builds from source. That needs the Swift toolchain, which comes with the Xcode Command Line Tools (`xcode-select --install`).
+
+To build from a clone instead:
 
 ```sh
 git clone https://github.com/shortcuts/quickadd-macos-menubar
@@ -30,7 +36,7 @@ cd quickadd-macos-menubar
 make install
 ```
 
-`make install` builds the app, copies it to `~/Applications`, and starts it. A pencil icon appears in the menu bar. Choose **Launch at Login** in its menu to start it with your Mac.
+A pencil icon appears in the menu bar. Choose **Launch at Login** in its menu to start it with your Mac.
 
 <!-- SECTION: GETTING_STARTED -->
 ## ☄ Getting started

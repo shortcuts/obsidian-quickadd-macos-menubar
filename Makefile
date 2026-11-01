@@ -3,11 +3,13 @@
 VERSION := $(shell cat version.txt)
 APP := .build/QuickAddMenubar.app
 SOURCES := Package.swift Sources Tests
+# CI passes `--arch arm64 --arch x86_64` to build the universal release binary.
+SWIFT_FLAGS :=
 
 all: lint test build
 
 build:
-	swift build -c release
+	swift build -c release $(SWIFT_FLAGS)
 
 test:
 	swift test
@@ -24,7 +26,7 @@ format:
 app: build
 	rm -rf $(APP)
 	mkdir -p $(APP)/Contents/MacOS
-	cp "$$(swift build -c release --show-bin-path)/QuickAddMenubar" $(APP)/Contents/MacOS/
+	cp "$$(swift build -c release $(SWIFT_FLAGS) --show-bin-path)/QuickAddMenubar" $(APP)/Contents/MacOS/
 	cp Resources/Info.plist $(APP)/Contents/Info.plist
 	/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $(VERSION)" $(APP)/Contents/Info.plist
 	codesign --force --sign - $(APP)

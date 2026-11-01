@@ -230,4 +230,26 @@ import Testing
   @Test func shippedTemplateMatchesDefaults() throws {
     #expect(try Config.parse(Config.template) == .default)
   }
+
+  @Test(arguments: [
+    Config.default,
+    Config(
+      vault: "My \"Vault\" \\ #1", variable: "x", choices: ["B", "A#"], keyCode: 0,
+      modifiers: UInt32(controlKey | optionKey | cmdKey | shiftKey)),
+    Config(vault: nil, variable: "text", choices: [], keyCode: 12, modifiers: UInt32(cmdKey)),
+  ])
+  func serializedConfigParsesBack(_ config: Config) throws {
+    #expect(try Config.parse(config.serialized()) == config)
+  }
+}
+
+@Suite struct VaultNamesTests {
+  @Test func listsVaultFolderNamesSorted() {
+    let json = #"{"vaults":{"a":{"path":"/x/Zeta"},"b":{"path":"/y/Alpha","open":true}}}"#
+    #expect(Vault.names(registry: Data(json.utf8)) == ["Alpha", "Zeta"])
+  }
+
+  @Test func badRegistryGivesNoNames() {
+    #expect(Vault.names(registry: Data("nope".utf8)).isEmpty)
+  }
 }

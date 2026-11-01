@@ -87,6 +87,31 @@ public struct Config: Equatable {
     return config
   }
 
+  /// The text that the Settings window saves. Comments are not kept, so a hand edit loses them.
+  public func serialized() -> String {
+    func quoted(_ text: String) -> String {
+      let escaped = text.replacingOccurrences(of: "\\", with: "\\\\")
+        .replacingOccurrences(of: "\"", with: "\\\"")
+        .replacingOccurrences(of: "\n", with: "\\n")
+        .replacingOccurrences(of: "\t", with: "\\t")
+      return "\"\(escaped)\""
+    }
+    var lines: [String] = []
+    if let vault { lines.append("vault = \(quoted(vault))") }
+    if let choices { lines.append("choices = [\(choices.map(quoted).joined(separator: ", "))]") }
+    lines.append("variable = \(quoted(variable))")
+    lines.append("key_code = \(keyCode)")
+    let names = Self.canonicalModifiers.filter { modifiers & UInt32($0.1) != 0 }.map {
+      quoted($0.0)
+    }
+    lines.append("modifiers = [\(names.joined(separator: ", "))]")
+    return lines.joined(separator: "\n") + "\n"
+  }
+
+  private static let canonicalModifiers: [(String, Int)] = [
+    ("cmd", cmdKey), ("shift", shiftKey), ("option", optionKey), ("control", controlKey),
+  ]
+
   private static func mask(_ names: [String]) throws -> UInt32 {
     var mask = 0
     for name in names {

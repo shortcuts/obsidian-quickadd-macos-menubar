@@ -45,6 +45,16 @@ public struct Vault: Equatable {
     return Vault(path: URL(fileURLWithPath: match.path))
   }
 
+  /// Folder names of the vaults that Obsidian knows, for the Settings window.
+  public static func names(registry data: Data) -> [String] {
+    guard let registry = try? JSONDecoder().decode(Registry.self, from: data) else { return [] }
+    return registry.vaults.values.map { URL(fileURLWithPath: $0.path).lastPathComponent }.sorted()
+  }
+
+  public static func names() -> [String] {
+    (try? Data(contentsOf: registryURL)).map { names(registry: $0) } ?? []
+  }
+
   public static func resolve(name: String?) throws -> Vault {
     guard let data = try? Data(contentsOf: registryURL) else {
       throw QuickAddError.vaultNotFound(name)

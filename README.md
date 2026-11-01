@@ -55,7 +55,9 @@ QuickAdd shows its usual notification when the capture is done.
 <!-- SECTION: CONFIGURATION -->
 ## ⚙ Configuration
 
-The app works with no configuration. To change the defaults, choose **Edit Config…** in the menu. It creates `~/.config/quickadd-menubar/config.toml` and opens it. Choose **Reload Config** after you save.
+The app works with no configuration. To change the defaults, choose **Settings…** in the menu. The window sets the vault, the choices, the variable, and the hotkey. To set the hotkey, click the shortcut button and press the keys you want. Saving applies the change at once.
+
+The window writes `~/.config/quickadd-menubar/config.toml`. It drops comments from the file. To edit the file by hand, choose **Edit Config…**, then **Reload Config** after you save.
 
 ```toml
 vault = "My Vault"
@@ -77,7 +79,7 @@ Every key is optional:
 
 The parser reads a subset of TOML: top-level `key = value` lines, `#` comments, strings, integers, and string arrays on one line. It rejects unknown keys, so a typo shows an alert instead of doing nothing. An invalid file keeps the previous hotkey. A missing file uses the defaults.
 
-If another app already owns your hotkey, the app tells you at launch. Change `keyCode` or `modifiers`.
+If another app already owns your hotkey, the app tells you at launch. Choose another shortcut in **Settings…**.
 
 <!-- SECTION: KEYBOARD -->
 ## ⌨ Keyboard
@@ -98,6 +100,7 @@ Clicking outside the prompt also closes it.
 |----------------|---------------------------------|
 |**Capture…**| Opens the prompt, like the hotkey. |
 |**Launch at Login**| Starts the app when you log in. |
+|**Settings…**| Opens the settings window. |
 |**Edit Config…**| Opens the config file. |
 |**Reload Config**| Reads the config file and registers the hotkey again. |
 |**Quit QuickAdd Menubar**| Stops the app. |

@@ -4,6 +4,7 @@ import ServiceManagement
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
   private let panel = CapturePanel()
+  private let settings = SettingsWindow()
   private let loginItem = NSMenuItem(
     title: "Launch at Login", action: #selector(toggleLogin), keyEquivalent: "")
   private var statusItem: NSStatusItem?
@@ -14,6 +15,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
   func applicationDidFinishLaunching(_ notification: Notification) {
     panel.onSubmit = { [weak self] choice, text in self?.submit(choice: choice, text: text) }
+    settings.onSave = { [weak self] in self?.reloadConfig() }
+    settings.onError = { [weak self] in self?.alert($0) }
     setUpStatusItem()
     reloadConfig()
   }
@@ -29,6 +32,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     menu.addItem(.separator())
     loginItem.target = self
     menu.addItem(loginItem)
+    menu.addItem(withTitle: "Settings…", action: #selector(showSettings), keyEquivalent: ",")
+      .target = self
     menu.addItem(withTitle: "Edit Config…", action: #selector(editConfig), keyEquivalent: "")
       .target = self
     menu.addItem(withTitle: "Reload Config", action: #selector(reloadConfig), keyEquivalent: "")
@@ -94,7 +99,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     if hotKey == nil {
       alert(
         "Hotkey unavailable",
-        "Another app uses this key combination. Change `keyCode` or `modifiers` in the config.")
+        "Another app uses this key combination. Choose another shortcut in Settings….")
     }
   }
 
@@ -141,6 +146,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     } catch {
       alert(error)
     }
+  }
+
+  @objc private func showSettings() {
+    // A broken file would otherwise be overwritten without the user seeing the error.
+    do { settings.present(config: try Config.load()) } catch { alert(error) }
   }
 
   @objc private func editConfig() {

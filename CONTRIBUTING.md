@@ -18,6 +18,16 @@ cd obsidian-quickadd-macos-menubar
 make test
 ```
 
+## Build from source
+
+Use this instead of the release download. It needs the Swift toolchain from [Setup](#setup).
+
+```sh
+git clone https://github.com/shortcuts/obsidian-quickadd-macos-menubar
+cd obsidian-quickadd-macos-menubar
+make install
+```
+
 ## Run the app
 
 ```sh

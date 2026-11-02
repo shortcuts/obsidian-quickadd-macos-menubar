@@ -27,15 +27,7 @@ Press a global hotkey. A small prompt floats over whatever you are doing. Pick a
 curl -fsSL https://raw.githubusercontent.com/shortcuts/obsidian-quickadd-macos-menubar/main/install.sh | sh
 ```
 
-The script downloads the latest release into `~/Applications` and starts it. If no release exists, it builds from source. That needs the Swift toolchain, which comes with the Xcode Command Line Tools (`xcode-select --install`).
-
-To build from a clone instead:
-
-```sh
-git clone https://github.com/shortcuts/obsidian-quickadd-macos-menubar
-cd obsidian-quickadd-macos-menubar
-make install
-```
+The script downloads the latest release into `~/Applications` and starts it. To build from source, see [CONTRIBUTING.md](./CONTRIBUTING.md#build-from-source).
 
 A pencil icon appears in the menu bar. Check **Launch at login** in **Settings…** to start it with your Mac.
 

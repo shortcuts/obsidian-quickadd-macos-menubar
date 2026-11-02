@@ -1,13 +1,22 @@
 ---
 name: Feature request
-about: Suggest anything that would make your life easier, or the plugin better.
+about: Suggest a feature or improvement
+title: "[feature]: "
+labels: ["enhancement"]
 ---
 
 ## Describe the problem
 
-<!-- Explain what the new feature is, or if it's for the documentation, what do you expect. -->
+<!-- Describe the current limitation or pain point you're experiencing. -->
 
 ## Describe the solution
 
-<!-- Explain what your solution would look like. -->
+<!-- Explain how you'd like the feature to work. -->
 
+## Alternative approaches considered
+
+<!-- Any other ways you've thought about solving this? -->
+
+## Additional context
+
+<!-- Any other information that might be helpful? -->

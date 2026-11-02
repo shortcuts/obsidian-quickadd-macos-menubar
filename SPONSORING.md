@@ -1,6 +1,6 @@
 # Sponsoring
 
-quickadd-macos-menubar is free and MIT licensed. One person maintains it in their spare time.
+obsidian-quickadd-macos-menubar is free and MIT licensed. One person maintains it in their spare time.
 
 If it saves you time, you can support the work:
 

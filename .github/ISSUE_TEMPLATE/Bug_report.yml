@@ -12,7 +12,7 @@ body:
         - Is there an issue already opened for this bug?
         - Can I reproduce it?
 
-        In doubt, you can also open [a discussion](https://github.com/shortcuts/quickadd-macos-menubar/discussions/new/choose).
+        In doubt, you can also open [a discussion](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/discussions/new/choose).
   - type: textarea
     attributes:
       label: Description

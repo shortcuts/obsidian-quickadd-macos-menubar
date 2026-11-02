@@ -1,7 +1,7 @@
 #!/bin/sh
 set -eu
 
-repo=shortcuts/quickadd-macos-menubar
+repo=shortcuts/obsidian-quickadd-macos-menubar
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
 

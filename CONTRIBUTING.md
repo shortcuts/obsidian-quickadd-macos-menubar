@@ -4,7 +4,7 @@ Thank you for helping. Issues and pull requests are welcome.
 
 ## Before you start
 
-- Search the [issues](https://github.com/shortcuts/quickadd-macos-menubar/issues) first.
+- Search the [issues](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/issues) first.
 - For a new feature, open an issue before you write code. A short description of the problem is enough.
 - [README.md](./README.md) is the source of truth for behavior. A change that contradicts it needs a README change in the same pull request.
 
@@ -13,8 +13,8 @@ Thank you for helping. Issues and pull requests are welcome.
 You need macOS 13 or later and the Swift toolchain (`xcode-select --install`). There are no other dependencies.
 
 ```sh
-git clone https://github.com/shortcuts/quickadd-macos-menubar
-cd quickadd-macos-menubar
+git clone https://github.com/shortcuts/obsidian-quickadd-macos-menubar
+cd obsidian-quickadd-macos-menubar
 make test
 ```
 

@@ -1,10 +1,10 @@
 # AGENTS.md
 
-Repository: https://github.com/shortcuts/quickadd-macos-menubar
+Repository: https://github.com/shortcuts/obsidian-quickadd-macos-menubar
 Language: Swift
 Target runtime: macOS ≥ 13
 
-`quickadd-macos-menubar` is a menu bar app that runs [QuickAdd](https://github.com/chhoumann/quickadd) choices from anywhere on the Mac.
+`obsidian-quickadd-macos-menubar` is a menu bar app that runs [QuickAdd](https://github.com/chhoumann/quickadd) choices from anywhere on the Mac.
 A global hotkey opens a small floating prompt. The user picks a choice, types text, and presses Enter.
 Obsidian receives the text through its URI handler and stays in the background.
 

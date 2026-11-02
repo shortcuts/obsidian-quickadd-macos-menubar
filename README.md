@@ -1,5 +1,5 @@
 <p align="center">
-  <h1 align="center">✏️ quickadd-macos-menubar</h1>
+  <h1 align="center">✏️ obsidian-quickadd-macos-menubar</h1>
 </p>
 
 <p align="center">
@@ -24,7 +24,7 @@ Press a global hotkey. A small prompt floats over whatever you are doing. Pick a
 ## 📋 Installation
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/shortcuts/quickadd-macos-menubar/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/shortcuts/obsidian-quickadd-macos-menubar/main/install.sh | sh
 ```
 
 The script downloads the latest release into `~/Applications` and starts it. If no release exists, it builds from source. That needs the Swift toolchain, which comes with the Xcode Command Line Tools (`xcode-select --install`).
@@ -32,8 +32,8 @@ The script downloads the latest release into `~/Applications` and starts it. If 
 To build from a clone instead:
 
 ```sh
-git clone https://github.com/shortcuts/quickadd-macos-menubar
-cd quickadd-macos-menubar
+git clone https://github.com/shortcuts/obsidian-quickadd-macos-menubar
+cd obsidian-quickadd-macos-menubar
 make install
 ```
 

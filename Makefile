@@ -28,6 +28,8 @@ app: build
 	mkdir -p $(APP)/Contents/MacOS
 	cp "$$(swift build -c release $(SWIFT_FLAGS) --show-bin-path)/QuickAddMenubar" $(APP)/Contents/MacOS/
 	cp Resources/Info.plist $(APP)/Contents/Info.plist
+	mkdir -p $(APP)/Contents/Resources
+	cp Resources/AppIcon.icns $(APP)/Contents/Resources/
 	/usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString $(VERSION)" $(APP)/Contents/Info.plist
 	codesign --force --sign - $(APP)
 

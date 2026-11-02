@@ -227,10 +227,6 @@ import Testing
     }
   }
 
-  @Test func shippedTemplateMatchesDefaults() throws {
-    #expect(try Config.parse(Config.template) == .default)
-  }
-
   @Test(arguments: [
     Config.default,
     Config(

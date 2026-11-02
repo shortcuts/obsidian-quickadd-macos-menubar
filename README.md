@@ -36,7 +36,7 @@ cd quickadd-macos-menubar
 make install
 ```
 
-A pencil icon appears in the menu bar. Choose **Launch at Login** in its menu to start it with your Mac.
+A pencil icon appears in the menu bar. Check **Launch at login** in **Settings…** to start it with your Mac.
 
 <!-- SECTION: GETTING_STARTED -->
 ## ☄ Getting started
@@ -61,9 +61,9 @@ QuickAdd shows its usual notification when the capture is done.
 <!-- SECTION: CONFIGURATION -->
 ## ⚙ Configuration
 
-The app works with no configuration. To change the defaults, choose **Settings…** in the menu. The window sets the vault, the choices, the variable, and the hotkey. To set the hotkey, click the shortcut button and press the keys you want. Saving applies the change at once.
+The app works with no configuration. To change the defaults, choose **Settings…** in the menu. The window sets the vault, the choices, the variable, the hotkey, and whether the app launches at login. To set the hotkey, click the shortcut button and press the keys you want. Saving applies the change at once.
 
-The window writes `~/.config/quickadd-menubar/config.toml`. It drops comments from the file. To edit the file by hand, choose **Edit Config…**, then **Reload Config** after you save.
+The window writes `~/.config/quickadd-menubar/config.toml`. It drops comments from the file. To edit the file by hand, create it at that path, then choose **Reload Config** after you save.
 
 ```toml
 vault = "My Vault"
@@ -104,10 +104,8 @@ Clicking outside the prompt also closes it.
 
 |      Item      |           Description           |
 |----------------|---------------------------------|
-|**Capture…**| Opens the prompt, like the hotkey. |
-|**Launch at Login**| Starts the app when you log in. |
+|**Capture…**| Opens the prompt, like the hotkey. Shows the hotkey. |
 |**Settings…**| Opens the settings window. |
-|**Edit Config…**| Opens the config file. |
 |**Reload Config**| Reads the config file and registers the hotkey again. |
 |**Quit QuickAdd Menubar**| Stops the app. |
 

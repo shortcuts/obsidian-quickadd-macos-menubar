@@ -1,6 +1,7 @@
 import AppKit
 import Carbon.HIToolbox
 import QuickAddCore
+import ServiceManagement
 
 /// Edits `config.toml` through native controls. The hotkey modifiers stay hidden: the user
 /// presses the whole shortcut and the recorder keeps both parts.
@@ -15,6 +16,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
   private let variableField = NSTextField()
   private let hotKeyButton = NSButton()
   private let choicesStack = NSStackView()
+  private let loginBox = NSButton(checkboxWithTitle: "Launch at login", target: nil, action: nil)
   private var keyCode = Config.default.keyCode
   private var modifiers = Config.default.modifiers
   private var recorder: Any?
@@ -48,6 +50,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
       [NSTextField(labelWithString: "Choices"), choicesStack],
       [NSTextField(labelWithString: "Variable"), variableField],
       [NSTextField(labelWithString: "Hotkey"), hotKeyButton],
+      [NSGridCell.emptyContentView, loginBox],
       [NSGridCell.emptyContentView, save],
     ])
     grid.column(at: 0).xPlacement = .trailing
@@ -71,6 +74,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     modifiers = config.modifiers
     checked = config.choices.map(Set.init)
     variableField.stringValue = config.variable
+    loginBox.state = SMAppService.mainApp.status == .enabled ? .on : .off
     reloadVaults(selecting: config.vault)
     updateHotKeyTitle()
     window?.center()
@@ -133,6 +137,14 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
       try FileManager.default.createDirectory(
         at: Config.fileURL.deletingLastPathComponent(), withIntermediateDirectories: true)
       try config.serialized().write(to: Config.fileURL, atomically: true, encoding: .utf8)
+      let enabled = SMAppService.mainApp.status == .enabled
+      if (loginBox.state == .on) != enabled {
+        if enabled {
+          try SMAppService.mainApp.unregister()
+        } else {
+          try SMAppService.mainApp.register()
+        }
+      }
     } catch {
       return onError?(error) ?? ()
     }
@@ -180,6 +192,15 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     hotKeyButton.title = Self.describe(keyCode: keyCode, modifiers: modifiers)
   }
 
+  static func eventModifiers(_ mask: UInt32) -> NSEvent.ModifierFlags {
+    var flags: NSEvent.ModifierFlags = []
+    if mask & UInt32(cmdKey) != 0 { flags.insert(.command) }
+    if mask & UInt32(shiftKey) != 0 { flags.insert(.shift) }
+    if mask & UInt32(optionKey) != 0 { flags.insert(.option) }
+    if mask & UInt32(controlKey) != 0 { flags.insert(.control) }
+    return flags
+  }
+
   private static func carbonModifiers(_ flags: NSEvent.ModifierFlags) -> UInt32 {
     var mask = 0
     if flags.contains(.command) { mask |= cmdKey }
@@ -199,7 +220,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
   }
 
   /// Asks the current keyboard layout for the key's character. Carbon has no name table.
-  private static func keyName(_ keyCode: UInt32) -> String {
+  static func keyName(_ keyCode: UInt32) -> String {
     let fallback = "Key \(keyCode)"
     guard
       let source = TISCopyCurrentASCIICapableKeyboardLayoutInputSource()?.takeRetainedValue(),

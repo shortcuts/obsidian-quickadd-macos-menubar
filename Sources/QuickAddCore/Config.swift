@@ -27,25 +27,6 @@ public struct Config: Equatable {
       .appendingPathComponent(".config/quickadd-menubar/config.toml")
   }
 
-  /// The file that **Edit Config…** creates. The uncommented lines equal `Config.default`.
-  public static let template = """
-    # QuickAdd Menubar. Every key is optional.
-
-    # The folder name of your vault. Default: the vault that is open in Obsidian.
-    # vault = "My Vault"
-
-    # The choices to show, in this order. Default: every QuickAdd choice.
-    # choices = ["TODO", "Daily"]
-
-    # The {{VALUE:<variable>}} name that your choices read.
-    variable = "text"
-
-    # The hotkey. 41 is ";". Key codes: https://eastmanreference.com/complete-list-of-applescript-key-codes
-    key_code = 41
-    modifiers = ["cmd", "shift"]
-
-    """
-
   private static let modifierMasks: [String: Int] = [
     "cmd": cmdKey, "shift": shiftKey, "option": optionKey, "alt": optionKey,
     "control": controlKey, "ctrl": controlKey,

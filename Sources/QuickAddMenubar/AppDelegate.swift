@@ -1,12 +1,11 @@
 import AppKit
 import QuickAddCore
-import ServiceManagement
 
 final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
   private let panel = CapturePanel()
   private let settings = SettingsWindow()
-  private let loginItem = NSMenuItem(
-    title: "Launch at Login", action: #selector(toggleLogin), keyEquivalent: "")
+  private let captureItem = NSMenuItem(
+    title: "Capture…", action: #selector(capture), keyEquivalent: "")
   private var statusItem: NSStatusItem?
   private var hotKey: HotKey?
   private var config = Config.default
@@ -31,13 +30,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     let menu = NSMenu()
     menu.delegate = self
-    menu.addItem(withTitle: "Capture…", action: #selector(capture), keyEquivalent: "").target = self
+    captureItem.target = self
+    menu.addItem(captureItem)
     menu.addItem(.separator())
-    loginItem.target = self
-    menu.addItem(loginItem)
     menu.addItem(withTitle: "Settings…", action: #selector(showSettings), keyEquivalent: ",")
-      .target = self
-    menu.addItem(withTitle: "Edit Config…", action: #selector(editConfig), keyEquivalent: "")
       .target = self
     menu.addItem(withTitle: "Reload Config", action: #selector(reloadConfig), keyEquivalent: "")
       .target = self
@@ -50,7 +46,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
   }
 
   func menuWillOpen(_ menu: NSMenu) {
-    loginItem.state = SMAppService.mainApp.status == .enabled ? .on : .off
     for item in warningItems { menu.removeItem(item) }
     warningItems = []
     let found = currentProblems()
@@ -99,6 +94,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     hotKey = HotKey(keyCode: config.keyCode, modifiers: config.modifiers) { [weak self] in
       self?.capture()
     }
+    // The menu shows the shortcut in its native right-aligned column.
+    captureItem.keyEquivalent = SettingsWindow.keyName(config.keyCode).lowercased()
+    captureItem.keyEquivalentModifierMask = SettingsWindow.eventModifiers(config.modifiers)
     if hotKey == nil {
       alert(
         "Hotkey unavailable",
@@ -139,31 +137,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
   }
 
-  @objc private func toggleLogin() {
-    do {
-      if SMAppService.mainApp.status == .enabled {
-        try SMAppService.mainApp.unregister()
-      } else {
-        try SMAppService.mainApp.register()
-      }
-    } catch {
-      alert(error)
-    }
-  }
-
   @objc private func showSettings() {
     // A broken file would otherwise be overwritten without the user seeing the error.
     do { settings.present(config: try Config.load()) } catch { alert(error) }
-  }
-
-  @objc private func editConfig() {
-    let url = Config.fileURL
-    if !FileManager.default.fileExists(atPath: url.path) {
-      try? FileManager.default.createDirectory(
-        at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
-      try? Config.template.write(to: url, atomically: true, encoding: .utf8)
-    }
-    NSWorkspace.shared.open(url)
   }
 
   private func alert(_ error: Error) {

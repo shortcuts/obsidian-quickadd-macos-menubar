@@ -3,10 +3,13 @@ import AppKit
 /// The floating prompt: one row of destinations over one text field. It never activates the
 /// app, so the window you were typing in keeps focus once the panel closes.
 final class CapturePanel: NSPanel, NSTextFieldDelegate {
-  var onSubmit: ((_ choice: String, _ text: String) -> Void)?
+  /// `remind` is the due date when the reminder box is checked.
+  var onSubmit: ((_ choice: String, _ text: String, _ remind: Date?) -> Void)?
 
   private let field = NSTextField()
   private let chips = NSStackView()
+  private let remindBox = NSButton(checkboxWithTitle: "Remind me", target: nil, action: nil)
+  private let picker = NSDatePicker()
   private let warning = NSTextField(wrappingLabelWithString: "")
   private var problems: [String: String] = [:]
   private var choices: [String] = []
@@ -46,7 +49,16 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     warning.textColor = .systemOrange
     warning.preferredMaxLayoutWidth = 484
 
-    let stack = NSStackView(views: [chips, field, warning])
+    remindBox.font = .systemFont(ofSize: 12)
+    remindBox.target = self
+    remindBox.action = #selector(remindToggled)
+    picker.datePickerStyle = .textFieldAndStepper
+    picker.datePickerElements = [.yearMonthDay, .hourMinute]
+    picker.controlSize = .small
+    let reminder = NSStackView(views: [remindBox, picker])
+    reminder.spacing = 10
+
+    let stack = NSStackView(views: [chips, field, reminder, warning])
     stack.orientation = .vertical
     stack.alignment = .leading
     stack.spacing = 12
@@ -74,6 +86,11 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     self.problems = problems
     selected = last.flatMap { choices.firstIndex(of: $0) } ?? 0
     field.stringValue = ""
+    remindBox.state = .off
+    picker.isHidden = true
+    // The next full hour is a sensible default and is never in the past.
+    let hour = Calendar.current.dateInterval(of: .hour, for: Date())?.end
+    picker.dateValue = hour ?? Date().addingTimeInterval(3600)
     refreshChips()
 
     // Open on the screen that holds the pointer: that is where the user is looking.
@@ -114,6 +131,11 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     setFrame(next, display: true)
   }
 
+  @objc private func remindToggled() {
+    picker.isHidden = remindBox.state == .off
+    refreshChips()
+  }
+
   private func cycle(_ step: Int) {
     selected = (selected + step + choices.count) % choices.count
     refreshChips()
@@ -124,7 +146,7 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     guard !text.isEmpty, choices.indices.contains(selected) else { return }
     let choice = choices[selected]
     orderOut(nil)
-    onSubmit?(choice, text)
+    onSubmit?(choice, text, remindBox.state == .on ? picker.dateValue : nil)
   }
 
   func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {

@@ -16,6 +16,10 @@
   <string>0.0.0</string>
   <key>CFBundleVersion</key>
   <string>1</string>
+  <key>NSRemindersUsageDescription</key>
+  <string>QuickAdd Menubar creates a reminder when you check "Remind me".</string>
+  <key>NSRemindersFullAccessUsageDescription</key>
+  <string>QuickAdd Menubar creates a reminder when you check "Remind me".</string>
   <key>LSMinimumSystemVersion</key>
   <string>13.0</string>
   <key>LSUIElement</key>

@@ -9,6 +9,8 @@ public struct Config: Equatable {
   public var variable: String
   /// The choices to show, in this order. `nil` shows every QuickAdd choice.
   public var choices: [String]?
+  /// The Reminders list that receives reminders. The app creates it when it is missing.
+  public var reminderList: String
   /// A virtual key code. Carbon has no name table, so the file stores the number.
   public var keyCode: UInt32
   /// A Carbon modifier mask.
@@ -18,6 +20,7 @@ public struct Config: Equatable {
     vault: nil,
     variable: "text",
     choices: nil,
+    reminderList: "QuickAdd",
     keyCode: UInt32(kVK_ANSI_Semicolon),
     modifiers: UInt32(cmdKey | shiftKey)
   )
@@ -48,6 +51,9 @@ public struct Config: Equatable {
       case ("variable", .string(let name)):
         guard !name.isEmpty else { throw invalid("`variable` is empty") }
         config.variable = name
+      case ("reminder_list", .string(let name)):
+        guard !name.isEmpty else { throw invalid("`reminder_list` is empty") }
+        config.reminderList = name
       case ("choices", .strings(let names)):
         config.choices = names
       case ("key_code", .int(let code)):
@@ -55,7 +61,7 @@ public struct Config: Equatable {
         config.keyCode = code
       case ("modifiers", .strings(let names)):
         config.modifiers = try mask(names)
-      case ("vault", _), ("variable", _):
+      case ("vault", _), ("variable", _), ("reminder_list", _):
         throw invalid("`\(key)` must be a string")
       case ("choices", _), ("modifiers", _):
         throw invalid("`\(key)` must be a list of strings")
@@ -81,6 +87,7 @@ public struct Config: Equatable {
     if let vault { lines.append("vault = \(quoted(vault))") }
     if let choices { lines.append("choices = [\(choices.map(quoted).joined(separator: ", "))]") }
     lines.append("variable = \(quoted(variable))")
+    lines.append("reminder_list = \(quoted(reminderList))")
     lines.append("key_code = \(keyCode)")
     let names = Self.canonicalModifiers.filter { modifiers & UInt32($0.1) != 0 }.map {
       quoted($0.0)

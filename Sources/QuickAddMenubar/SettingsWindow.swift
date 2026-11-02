@@ -14,6 +14,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
 
   private let vaultPopUp = NSPopUpButton()
   private let variableField = NSTextField()
+  private let reminderListField = NSTextField()
   private let hotKeyButton = NSButton()
   private let choicesStack = NSStackView()
   private let loginBox = NSButton(checkboxWithTitle: "Launch at login", target: nil, action: nil)
@@ -49,6 +50,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
       [NSTextField(labelWithString: "Vault"), vaultPopUp],
       [NSTextField(labelWithString: "Choices"), choicesStack],
       [NSTextField(labelWithString: "Variable"), variableField],
+      [NSTextField(labelWithString: "Reminders list"), reminderListField],
       [NSTextField(labelWithString: "Hotkey"), hotKeyButton],
       [NSGridCell.emptyContentView, loginBox],
       [NSGridCell.emptyContentView, save],
@@ -57,6 +59,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     grid.rowSpacing = 12
     grid.translatesAutoresizingMaskIntoConstraints = false
     variableField.widthAnchor.constraint(equalToConstant: 200).isActive = true
+    reminderListField.widthAnchor.constraint(equalToConstant: 200).isActive = true
     let content = window.contentView!
     content.addSubview(grid)
     NSLayoutConstraint.activate([
@@ -74,6 +77,7 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
     modifiers = config.modifiers
     checked = config.choices.map(Set.init)
     variableField.stringValue = config.variable
+    reminderListField.stringValue = config.reminderList
     loginBox.state = SMAppService.mainApp.status == .enabled ? .on : .off
     reloadVaults(selecting: config.vault)
     updateHotKeyTitle()
@@ -123,12 +127,14 @@ final class SettingsWindow: NSWindowController, NSWindowDelegate {
 
   @objc private func save() {
     let variable = variableField.stringValue.trimmingCharacters(in: .whitespaces)
-    guard !variable.isEmpty else { return NSSound.beep() }
+    let list = reminderListField.stringValue.trimmingCharacters(in: .whitespaces)
+    guard !variable.isEmpty, !list.isEmpty else { return NSSound.beep() }
     let boxes = choiceBoxes
     let picked = boxes.filter { $0.state == .on }.map(\.title)
     var config = Config.default
     config.vault = selectedVault
     config.variable = variable
+    config.reminderList = list
     // Every box checked means "all", so choices added to the vault later appear on their own.
     config.choices = picked.count == boxes.count ? nil : picked
     config.keyCode = keyCode

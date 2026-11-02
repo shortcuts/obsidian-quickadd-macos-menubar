@@ -16,7 +16,8 @@ Press a global hotkey. A small prompt floats over whatever you are doing. Pick a
 - Works with the keyboard only: `Tab` picks the choice, `Enter` captures, `Esc` cancels.
 - Remembers the last choice you used.
 - Runs Obsidian in the background. The prompt does not switch apps.
-- Needs no Accessibility or other privacy permission.
+- Creates an optional macOS reminder, so iCloud alerts your other devices.
+- Needs no Accessibility, Input Monitoring or Automation permission.
 - Supports Apple Silicon and Intel Macs on macOS 13 or later.
 
 <!-- SECTION: INSTALLATION -->
@@ -58,10 +59,21 @@ Then:
 
 QuickAdd shows its usual notification when the capture is done.
 
+<!-- SECTION: REMINDERS -->
+## 🔔 Reminders
+
+Check **Remind me** in the prompt and pick a date and time. After the capture, the app adds a reminder to the Reminders list `QuickAdd`. It creates the list when it is missing.
+
+- The title is the first line of your text, cut to 60 characters.
+- The reminder links to your vault. Obsidian holds the full text.
+- The first time, macOS asks for access to Reminders. The prompt only appears when you use this option.
+- If the reminder fails, the capture still runs and the app shows a warning.
+- Cross-device alerts need a list in iCloud. A new list goes in the same account as your default list.
+
 <!-- SECTION: CONFIGURATION -->
 ## ⚙ Configuration
 
-The app works with no configuration. To change the defaults, choose **Settings…** in the menu. The window sets the vault, the choices, the variable, the hotkey, and whether the app launches at login. To set the hotkey, click the shortcut button and press the keys you want. Saving applies the change at once.
+The app works with no configuration. To change the defaults, choose **Settings…** in the menu. The window sets the vault, the choices, the variable, the hotkey, and the Reminders list, and whether the app launches at login. To set the hotkey, click the shortcut button and press the keys you want. Saving applies the change at once.
 
 The window writes `~/.config/quickadd-menubar/config.toml`. It drops comments from the file. To edit the file by hand, create it at that path, then choose **Reload Config** after you save.
 
@@ -69,6 +81,7 @@ The window writes `~/.config/quickadd-menubar/config.toml`. It drops comments fr
 vault = "My Vault"
 choices = ["TODO", "Daily"]
 variable = "text"
+reminder_list = "QuickAdd"
 key_code = 41
 modifiers = ["cmd", "shift"]
 ```
@@ -80,6 +93,7 @@ Every key is optional:
 |`vault`| the open vault | The folder name of the vault to use. Set it when you keep several vaults. |
 |`choices`| every choice | The QuickAdd choices to show, in this order. Names that the vault lacks are skipped. |
 |`variable`| `"text"` | The `{{VALUE:<variable>}}` name that your choices read. |
+|`reminder_list`| `"QuickAdd"` | The Reminders list for the **Remind me** option. |
 |`key_code`| `41` (`;`) | The virtual key code of the hotkey. [Key code list](https://eastmanreference.com/complete-list-of-applescript-key-codes). |
 |`modifiers`| `["cmd", "shift"]` | Any of `cmd`, `shift`, `option` (or `alt`), `control` (or `ctrl`). At least one is required. |
 
@@ -97,7 +111,7 @@ If another app already owns your hotkey, the app tells you at launch. Choose ano
 |`Enter`| Runs the choice with your text. |
 |`Esc`| Closes the prompt. |
 
-Clicking outside the prompt also closes it.
+Clicking outside the prompt also closes it. **Remind me** needs the mouse.
 
 <!-- SECTION: MENU -->
 ## 🧰 Menu bar

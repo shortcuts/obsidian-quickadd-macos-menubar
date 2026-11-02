@@ -13,7 +13,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
   private var warningItems: [NSMenuItem] = []
 
   func applicationDidFinishLaunching(_ notification: Notification) {
-    panel.onSubmit = { [weak self] choice, text in self?.submit(choice: choice, text: text) }
+    panel.onSubmit = { [weak self] choice, text, remind in
+      self?.submit(choice: choice, text: text, remind: remind)
+    }
     settings.onSave = { [weak self] in self?.reloadConfig() }
     settings.onError = { [weak self] in self?.alert($0) }
     settings.onRecording = { [weak self] recording in
@@ -124,7 +126,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     }
   }
 
-  private func submit(choice: String, text: String) {
+  private func submit(choice: String, text: String, remind: Date?) {
     guard let vault else { return }
     UserDefaults.standard.set(choice, forKey: "lastChoice")
     let url = quickAddURL(
@@ -134,6 +136,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     options.activates = false
     NSWorkspace.shared.open(url, configuration: options) { _, error in
       if let error { DispatchQueue.main.async { self.alert(error) } }
+    }
+    // The capture is already on its way, so a reminder failure only warns.
+    if let remind {
+      Reminders.add(
+        title: Reminder.title(for: text), url: Reminder.vaultURL(vault: vault.name),
+        due: remind, list: config.reminderList
+      ) { error in
+        if let error {
+          DispatchQueue.main.async {
+            self.alert("Reminder not created", error.localizedDescription)
+          }
+        }
+      }
     }
   }
 

@@ -203,12 +203,14 @@ import Testing
       vault = "v"
       variable = "x"
       choices = ["B", "A"]
+      reminder_list = "Inbox"
       key_code = 0
       modifiers = ["ctrl", "Option"]
       """)
     #expect(config.vault == "v")
     #expect(config.variable == "x")
     #expect(config.choices == ["B", "A"])
+    #expect(config.reminderList == "Inbox")
     #expect(config.keyCode == 0)
     #expect(config.modifiers == UInt32(controlKey | optionKey))
   }
@@ -216,6 +218,7 @@ import Testing
   @Test(arguments: [
     #"modifiers = ["hyper"]"#, "modifiers = []", #"variable = """#, "key_code = -1",
     #"key_code = "41""#, #"vault = 3"#, #"choices = "TODO""#, #"typo = "x""#,
+    #"reminder_list = """#, "reminder_list = 3",
   ])
   func rejectsInvalidSettings(_ text: String) {
     #expect(throws: QuickAddError.self) { try Config.parse(text) }
@@ -230,9 +233,12 @@ import Testing
   @Test(arguments: [
     Config.default,
     Config(
-      vault: "My \"Vault\" \\ #1", variable: "x", choices: ["B", "A#"], keyCode: 0,
+      vault: "My \"Vault\" \\ #1", variable: "x", choices: ["B", "A#"], reminderList: "L \"1\"",
+      keyCode: 0,
       modifiers: UInt32(controlKey | optionKey | cmdKey | shiftKey)),
-    Config(vault: nil, variable: "text", choices: [], keyCode: 12, modifiers: UInt32(cmdKey)),
+    Config(
+      vault: nil, variable: "text", choices: [], reminderList: "QuickAdd", keyCode: 12,
+      modifiers: UInt32(cmdKey)),
   ])
   func serializedConfigParsesBack(_ config: Config) throws {
     #expect(try Config.parse(config.serialized()) == config)
@@ -247,5 +253,31 @@ import Testing
 
   @Test func badRegistryGivesNoNames() {
     #expect(Vault.names(registry: Data("nope".utf8)).isEmpty)
+  }
+}
+
+@Suite struct ReminderTests {
+  @Test func keepsShortTitles() {
+    #expect(Reminder.title(for: "  buy milk ") == "buy milk")
+  }
+
+  @Test func usesTheFirstLine() {
+    #expect(Reminder.title(for: "first\nsecond") == "first")
+  }
+
+  @Test func cutsLongTitles() {
+    let title = Reminder.title(for: String(repeating: "a", count: 100))
+    #expect(title == String(repeating: "a", count: 60) + "…")
+  }
+
+  @Test func keepsATitleOfExactlyTheLimit() {
+    let text = String(repeating: "é", count: 60)
+    #expect(Reminder.title(for: text) == text)
+  }
+
+  @Test func encodesTheVaultName() {
+    #expect(
+      Reminder.vaultURL(vault: "my & notes").absoluteString
+        == "obsidian://open?vault=my%20%26%20notes")
   }
 }

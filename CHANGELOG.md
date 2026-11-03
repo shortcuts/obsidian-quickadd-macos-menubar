@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/compare/v1.1.0...v1.2.0) (2026-11-03)
+
+
+### Features
+
+* calendar popover for the reminder date ([b1580ff](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/commit/b1580ff4650672ecdb88b717f459179913493801))
+
 ## [1.1.0](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/compare/v1.0.0...v1.1.0) (2026-11-03)
 
 

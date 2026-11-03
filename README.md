@@ -27,7 +27,16 @@ Press a global hotkey. A small prompt floats over whatever you are doing. Pick a
 curl -fsSL https://raw.githubusercontent.com/shortcuts/obsidian-quickadd-macos-menubar/main/install.sh | sh
 ```
 
-The script downloads the latest release into `~/Applications` and starts it. To build from source, see [CONTRIBUTING.md](./CONTRIBUTING.md#build-from-source).
+The script downloads the latest release into `~/Applications` and starts it.
+
+With [mise](https://mise.jdx.dev), add this to your `mise.toml`, then run `mise install`:
+
+```toml
+[tools]
+"github:shortcuts/obsidian-quickadd-macos-menubar" = { version = "latest", bin_path = "Contents/MacOS" }
+```
+
+Start the app with `QuickAddMenubar`. mise installs the bundle under `~/.local/share/mise/installs`, not in `~/Applications`. To build from source, see [CONTRIBUTING.md](./CONTRIBUTING.md#build-from-source).
 
 A pencil icon appears in the menu bar. Check **Launch at login** in **Settings…** to start it with your Mac.
 

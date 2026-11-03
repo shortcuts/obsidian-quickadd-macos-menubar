@@ -25,6 +25,34 @@ import Testing
   }
 }
 
+@Suite struct PasteTests {
+  @Test func oneFile() {
+    #expect(pastePaths([URL(fileURLWithPath: "/tmp/a.png")]) == "/tmp/a.png")
+  }
+
+  @Test func twoFilesJoinWithASpace() {
+    let urls = [URL(fileURLWithPath: "/tmp/a.png"), URL(fileURLWithPath: "/tmp/b.pdf")]
+    #expect(pastePaths(urls) == "/tmp/a.png /tmp/b.pdf")
+  }
+
+  @Test func keepsSpacesInAPath() {
+    #expect(pastePaths([URL(fileURLWithPath: "/tmp/my file.png")]) == "/tmp/my file.png")
+  }
+
+  @Test func keepsNonAscii() {
+    #expect(pastePaths([URL(fileURLWithPath: "/tmp/café ☕.png")]) == "/tmp/café ☕.png")
+  }
+
+  @Test func ignoresWebURLs() {
+    let urls = [URL(string: "https://example.com/a.png")!, URL(fileURLWithPath: "/tmp/a.png")]
+    #expect(pastePaths(urls) == "/tmp/a.png")
+  }
+
+  @Test func emptyList() {
+    #expect(pastePaths([]) == "")
+  }
+}
+
 @Suite struct ChoicesTests {
   @Test func listsTopLevelChoices() throws {
     let data = Data(

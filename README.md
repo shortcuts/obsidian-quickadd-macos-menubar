@@ -102,6 +102,7 @@ If another app already owns your hotkey, the app tells you at launch. Choose ano
 |`Shift+Tab`, `↑`| Selects the previous choice. |
 |`Enter`| Runs the choice with your text. |
 |`Esc`| Closes the prompt. |
+|`Cmd+V`| Pastes text as plain text, or the path of each file copied in Finder. |
 
 Clicking outside the prompt also closes it. **Remind me** needs the mouse.
 
@@ -126,6 +127,8 @@ The app reads two files, and it never writes to your vault:
 Nothing leaves your Mac except that URI, which goes to Obsidian on the same machine. The app makes no network request and stores nothing but the last choice you used (in `UserDefaults`).
 
 On Enter, it opens `obsidian://quickadd?vault=…&choice=…&value-text=…` without activating Obsidian. QuickAdd does the capture. If Obsidian is closed, macOS starts it first.
+
+A pasted file is not uploaded: only its path travels in the URI. A screenshot that is only in the clipboard, with no file, does not paste.
 
 <!-- SECTION: CONTRIBUTING -->
 ## ⌨ Contributing

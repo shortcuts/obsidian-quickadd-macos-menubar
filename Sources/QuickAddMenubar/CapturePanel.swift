@@ -1,4 +1,5 @@
 import AppKit
+import QuickAddCore
 
 /// The floating prompt: one row of destinations over one text field. It never activates the
 /// app, so the window you were typing in keeps focus once the panel closes.
@@ -6,7 +7,7 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
   /// `remind` is the due date when the reminder box is checked.
   var onSubmit: ((_ choice: String, _ text: String, _ remind: Date?) -> Void)?
 
-  private let field = NSTextField()
+  private let field = CaptureField()
   private let chips = NSStackView()
   private let remindBox = NSButton(checkboxWithTitle: "Remind me", target: nil, action: nil)
   private let picker = NSDatePicker()
@@ -161,6 +162,25 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
       cycle(-1)
     default:
       return false
+    }
+    return true
+  }
+}
+
+/// Handles Cmd+V itself: the app has no main menu, so no Edit menu routes `paste:`.
+private final class CaptureField: NSTextField {
+  override func performKeyEquivalent(with event: NSEvent) -> Bool {
+    guard event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+      event.charactersIgnoringModifiers == "v", let editor = currentEditor() as? NSTextView
+    else { return super.performKeyEquivalent(with: event) }
+    let urls =
+      NSPasteboard.general.readObjects(
+        forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
+    let paths = pastePaths(urls)
+    if paths.isEmpty {
+      editor.pasteAsPlainText(nil)
+    } else {
+      editor.insertText(paths, replacementRange: editor.selectedRange())
     }
     return true
   }

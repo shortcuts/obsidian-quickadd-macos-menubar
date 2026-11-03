@@ -3,7 +3,7 @@ import QuickAddCore
 
 /// The floating prompt: one row of destinations over one text field. It never activates the
 /// app, so the window you were typing in keeps focus once the panel closes.
-final class CapturePanel: NSPanel, NSTextViewDelegate {
+final class CapturePanel: NSPanel, NSTextViewDelegate, NSPopoverDelegate {
   /// `remind` is the due date when the reminder box is checked.
   var onSubmit: ((_ choice: String, _ text: String, _ remind: Date?) -> Void)?
 
@@ -15,6 +15,10 @@ final class CapturePanel: NSPanel, NSTextViewDelegate {
   private let chips = NSStackView()
   private let remindBox = NSButton(checkboxWithTitle: "Remind me", target: nil, action: nil)
   private let picker = NSDatePicker()
+  private let calendar = NSDatePicker()
+  private let calendarButton = NSButton()
+  private let popover = NSPopover()
+  private let reminder = NSStackView()
   private let warning = NSTextField(wrappingLabelWithString: "")
   private var problems: [String: String] = [:]
   private var choices: [String] = []
@@ -69,10 +73,27 @@ final class CapturePanel: NSPanel, NSTextViewDelegate {
     remindBox.font = .systemFont(ofSize: 12)
     remindBox.target = self
     remindBox.action = #selector(remindToggled)
-    picker.datePickerStyle = .textFieldAndStepper
+    picker.datePickerStyle = .textField
     picker.datePickerElements = [.yearMonthDay, .hourMinute]
     picker.controlSize = .small
-    let reminder = NSStackView(views: [remindBox, picker])
+    picker.target = self
+    picker.action = #selector(pickerChanged)
+    calendarButton.image = NSImage(
+      systemSymbolName: "calendar", accessibilityDescription: "Choose date")
+    calendarButton.bezelStyle = .inline
+    calendarButton.isBordered = false
+    calendarButton.target = self
+    calendarButton.action = #selector(toggleCalendar)
+    calendar.datePickerStyle = .clockAndCalendar
+    calendar.datePickerElements = [.yearMonthDay, .hourMinute]
+    calendar.target = self
+    calendar.action = #selector(calendarChanged)
+    let content = NSViewController()
+    content.view = calendar
+    popover.contentViewController = content
+    popover.behavior = .transient
+    popover.delegate = self
+    for view in [remindBox, picker, calendarButton] { reminder.addArrangedSubview(view) }
     reminder.spacing = 10
 
     let stack = NSStackView(views: [chips, scroll, reminder, warning])
@@ -96,6 +117,13 @@ final class CapturePanel: NSPanel, NSTextViewDelegate {
 
   override func resignKey() {
     super.resignKey()
+    // The calendar popover takes key status; it is part of the prompt.
+    if popover.isShown { return }
+    orderOut(nil)
+  }
+
+  func popoverDidClose(_ notification: Notification) {
+    if isKeyWindow { return }
     orderOut(nil)
   }
 
@@ -105,10 +133,13 @@ final class CapturePanel: NSPanel, NSTextViewDelegate {
     selected = last.flatMap { choices.firstIndex(of: $0) } ?? 0
     field.string = ""
     remindBox.state = .off
+    popover.close()
     picker.isHidden = true
+    calendarButton.isHidden = true
     // The next full hour is a sensible default and is never in the past.
     let hour = Calendar.current.dateInterval(of: .hour, for: Date())?.end
     picker.dateValue = hour ?? Date().addingTimeInterval(3600)
+    calendar.dateValue = picker.dateValue
 
     // Open on the screen that holds the pointer: that is where the user is looking.
     let mouse = NSEvent.mouseLocation
@@ -166,7 +197,26 @@ final class CapturePanel: NSPanel, NSTextViewDelegate {
 
   @objc private func remindToggled() {
     picker.isHidden = remindBox.state == .off
+    calendarButton.isHidden = picker.isHidden
     refreshChips()
+  }
+
+  @objc private func pickerChanged() {
+    calendar.dateValue = picker.dateValue
+  }
+
+  @objc private func calendarChanged() {
+    picker.dateValue = calendar.dateValue
+  }
+
+  @objc private func toggleCalendar() {
+    if popover.isShown {
+      popover.close()
+      makeFirstResponder(field)
+    } else {
+      calendar.dateValue = picker.dateValue
+      popover.show(relativeTo: calendarButton.bounds, of: calendarButton, preferredEdge: .maxY)
+    }
   }
 
   private func cycle(_ step: Int) {

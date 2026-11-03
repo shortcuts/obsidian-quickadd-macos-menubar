@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.1.0](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/compare/v1.0.0...v1.1.0) (2026-11-03)
+
+
+### Features
+
+* multi-line capture with Shift+Enter ([ebe86d2](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/commit/ebe86d224ac6ef1e90fc9255c5848c2499355cb6))
+* paste file paths into the capture field ([dd296ab](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/commit/dd296ab0cb415cac3456a7e25171830de3c47333))
+
+
+### Bug Fixes
+
+* paste with Cmd+V while Caps Lock is on ([5ab3370](https://github.com/shortcuts/obsidian-quickadd-macos-menubar/commit/5ab3370e35c4d256baa3cd3c0ae298cc096a63d5))
+
 ## 1.0.0 (2026-11-02)
 
 

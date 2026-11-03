@@ -69,6 +69,24 @@ import Testing
   }
 }
 
+@Suite struct CaptureFieldHeightTests {
+  @Test func belowOneLineGrowsToOneLine() {
+    #expect(captureFieldHeight(content: 0, screen: 1000) == 26)
+  }
+
+  @Test func betweenOneLineAndCapKeepsContent() {
+    #expect(captureFieldHeight(content: 120, screen: 1000) == 120)
+  }
+
+  @Test func aboveCapStopsAtAFifthOfTheScreen() {
+    #expect(captureFieldHeight(content: 900, screen: 1000) == 200)
+  }
+
+  @Test func zeroScreenKeepsOneLine() {
+    #expect(captureFieldHeight(content: 120, screen: 0) == 26)
+  }
+}
+
 @Suite struct ChoicesTests {
   @Test func listsTopLevelChoices() throws {
     let data = Data(

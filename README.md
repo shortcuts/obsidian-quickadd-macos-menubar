@@ -6,7 +6,7 @@
 	Run your Obsidian QuickAdd choices from anywhere on your Mac, without opening Obsidian.
 </p>
 
-Press a global hotkey. A small prompt floats over whatever you are doing. Pick a QuickAdd choice, type a line, and press Enter. The text lands in your vault, and the window you were using keeps focus.
+Press a global hotkey. A small prompt floats over whatever you are doing. Pick a QuickAdd choice, type your text, and press Enter. The text lands in your vault, and the window you were using keeps focus.
 
 <!-- SECTION: FEATURES -->
 ## ⚡️ Features
@@ -110,6 +110,7 @@ If another app already owns your hotkey, the app tells you at launch. Choose ano
 |`Tab`, `↓`| Selects the next choice. |
 |`Shift+Tab`, `↑`| Selects the previous choice. |
 |`Enter`| Runs the choice with your text. |
+|`Shift+Enter`| Starts a new line. The field grows to a fifth of the screen height, then scrolls. |
 |`Esc`| Closes the prompt. |
 |`Cmd+V`| Pastes text as plain text, or the path of each file copied in Finder. |
 

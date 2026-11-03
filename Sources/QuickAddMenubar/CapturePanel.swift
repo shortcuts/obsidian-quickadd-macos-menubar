@@ -3,11 +3,15 @@ import QuickAddCore
 
 /// The floating prompt: one row of destinations over one text field. It never activates the
 /// app, so the window you were typing in keeps focus once the panel closes.
-final class CapturePanel: NSPanel, NSTextFieldDelegate {
+final class CapturePanel: NSPanel, NSTextViewDelegate {
   /// `remind` is the due date when the reminder box is checked.
   var onSubmit: ((_ choice: String, _ text: String, _ remind: Date?) -> Void)?
 
-  private let field = CaptureField()
+  private let field = CaptureTextView()
+  private let scroll = NSScrollView()
+  private let placeholder = NSTextField(labelWithString: "Capture…")
+  private lazy var fieldHeight = scroll.heightAnchor.constraint(equalToConstant: 0)
+  private var screenHeight: CGFloat = 0
   private let chips = NSStackView()
   private let remindBox = NSButton(checkboxWithTitle: "Remind me", target: nil, action: nil)
   private let picker = NSDatePicker()
@@ -39,12 +43,24 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     chips.orientation = .horizontal
     chips.spacing = 6
 
-    field.isBordered = false
+    field.isRichText = false
     field.drawsBackground = false
-    field.focusRingType = .none
-    field.font = .systemFont(ofSize: 22)
-    field.placeholderString = "Capture…"
+    field.font = captureFont
+    field.textContainerInset = .zero
+    // 2 pt matches the text inset of the placeholder label.
+    field.textContainer?.lineFragmentPadding = 2
+    field.autoresizingMask = .width
+    field.isVerticallyResizable = true
+    field.maxSize = NSSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude)
     field.delegate = self
+    placeholder.font = captureFont
+    placeholder.textColor = .placeholderTextColor
+    placeholder.sizeToFit()
+    field.addSubview(placeholder)
+    scroll.documentView = field
+    scroll.drawsBackground = false
+    scroll.hasVerticalScroller = true
+    scroll.autohidesScrollers = true
 
     warning.font = .systemFont(ofSize: 12)
     warning.textColor = .systemOrange
@@ -59,7 +75,7 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     let reminder = NSStackView(views: [remindBox, picker])
     reminder.spacing = 10
 
-    let stack = NSStackView(views: [chips, field, reminder, warning])
+    let stack = NSStackView(views: [chips, scroll, reminder, warning])
     stack.orientation = .vertical
     stack.alignment = .leading
     stack.spacing = 12
@@ -71,7 +87,8 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
       stack.trailingAnchor.constraint(equalTo: background.trailingAnchor),
       stack.topAnchor.constraint(equalTo: background.topAnchor),
       stack.bottomAnchor.constraint(equalTo: background.bottomAnchor),
-      field.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -36),
+      scroll.widthAnchor.constraint(equalTo: stack.widthAnchor, constant: -36),
+      fieldHeight,
     ])
   }
 
@@ -86,17 +103,18 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     self.choices = choices
     self.problems = problems
     selected = last.flatMap { choices.firstIndex(of: $0) } ?? 0
-    field.stringValue = ""
+    field.string = ""
     remindBox.state = .off
     picker.isHidden = true
     // The next full hour is a sensible default and is never in the past.
     let hour = Calendar.current.dateInterval(of: .hour, for: Date())?.end
     picker.dateValue = hour ?? Date().addingTimeInterval(3600)
-    refreshChips()
 
     // Open on the screen that holds the pointer: that is where the user is looking.
     let mouse = NSEvent.mouseLocation
     let screen = NSScreen.screens.first { NSMouseInRect(mouse, $0.frame, false) } ?? .main
+    screenHeight = screen?.visibleFrame.height ?? 0
+    fitField()
     if let area = screen?.visibleFrame {
       setFrameOrigin(
         NSPoint(x: area.midX - frame.width / 2, y: area.minY + area.height * 0.62))
@@ -132,6 +150,20 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
     setFrame(next, display: true)
   }
 
+  func textDidChange(_ notification: Notification) {
+    fitField()
+  }
+
+  private func fitField() {
+    placeholder.isHidden = !field.string.isEmpty
+    guard let layout = field.layoutManager, let container = field.textContainer else { return }
+    layout.ensureLayout(for: container)
+    fieldHeight.constant = captureFieldHeight(
+      content: layout.usedRect(for: container).height, screen: screenHeight)
+    refreshChips()
+    field.scrollRangeToVisible(field.selectedRange())
+  }
+
   @objc private func remindToggled() {
     picker.isHidden = remindBox.state == .off
     refreshChips()
@@ -143,16 +175,17 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
   }
 
   private func submit() {
-    let text = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+    let text = field.string.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty, choices.indices.contains(selected) else { return }
     let choice = choices[selected]
     orderOut(nil)
     onSubmit?(choice, text, remindBox.state == .on ? picker.dateValue : nil)
   }
 
-  func control(_ control: NSControl, textView: NSTextView, doCommandBy selector: Selector) -> Bool {
+  func textView(_ textView: NSTextView, doCommandBy selector: Selector) -> Bool {
     switch selector {
     case #selector(insertNewline(_:)):
+      if NSApp.currentEvent?.modifierFlags.contains(.shift) == true { return false }
       submit()
     case #selector(cancelOperation(_:)):
       orderOut(nil)
@@ -168,19 +201,19 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
 }
 
 /// Handles Cmd+V itself: the app has no main menu, so no Edit menu routes `paste:`.
-private final class CaptureField: NSTextField {
+private final class CaptureTextView: NSTextView {
   override func performKeyEquivalent(with event: NSEvent) -> Bool {
     guard isPasteModifier(event.modifierFlags),
-      event.charactersIgnoringModifiers == "v", let editor = currentEditor() as? NSTextView
+      event.charactersIgnoringModifiers == "v", window?.firstResponder === self
     else { return super.performKeyEquivalent(with: event) }
     let urls =
       NSPasteboard.general.readObjects(
         forClasses: [NSURL.self], options: [.urlReadingFileURLsOnly: true]) as? [URL] ?? []
     let paths = pastePaths(urls)
     if paths.isEmpty {
-      editor.pasteAsPlainText(nil)
+      pasteAsPlainText(nil)
     } else {
-      editor.insertText(paths, replacementRange: editor.selectedRange())
+      insertText(paths, replacementRange: selectedRange())
     }
     return true
   }

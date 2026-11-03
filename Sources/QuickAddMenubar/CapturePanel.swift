@@ -170,7 +170,7 @@ final class CapturePanel: NSPanel, NSTextFieldDelegate {
 /// Handles Cmd+V itself: the app has no main menu, so no Edit menu routes `paste:`.
 private final class CaptureField: NSTextField {
   override func performKeyEquivalent(with event: NSEvent) -> Bool {
-    guard event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .command,
+    guard isPasteModifier(event.modifierFlags),
       event.charactersIgnoringModifiers == "v", let editor = currentEditor() as? NSTextView
     else { return super.performKeyEquivalent(with: event) }
     let urls =

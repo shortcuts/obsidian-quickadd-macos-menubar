@@ -1,3 +1,4 @@
+import AppKit
 import Carbon.HIToolbox
 import Foundation
 import Testing
@@ -50,6 +51,21 @@ import Testing
 
   @Test func emptyList() {
     #expect(pastePaths([]) == "")
+  }
+
+  @Test func commandAloneIsPaste() {
+    #expect(isPasteModifier([.command]))
+  }
+
+  @Test func capsLockDoesNotBlockPaste() {
+    #expect(isPasteModifier([.command, .capsLock]))
+  }
+
+  @Test func otherModifiersBlockPaste() {
+    #expect(!isPasteModifier([.command, .shift]))
+    #expect(!isPasteModifier([.command, .option]))
+    #expect(!isPasteModifier([.control]))
+    #expect(!isPasteModifier([]))
   }
 }
 
